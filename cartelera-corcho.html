@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cartelera de Corcho</title>
+<style>
+  @font-face {
+    font-family: 'Caveat';
+    src: local('Caveat');
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    overflow: hidden;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    background: #2b1c12;
+  }
+
+  /* ---------- TOP BAR (frame + projects) ---------- */
+
+  #frame-top {
+    background: linear-gradient(180deg, #6b4326 0%, #4a2e18 60%, #3a2412 100%);
+    padding: 10px 16px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.55) inset, 0 3px 6px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 50;
+    border-bottom: 4px solid #2a1a0d;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  #frame-top::-webkit-scrollbar { height: 6px; }
+  #frame-top::-webkit-scrollbar-thumb { background: #2a1a0d; border-radius: 4px; }
+
+  #app-title {
+    color: #e8d3a9;
+    font-family: 'Georgia', serif;
+    font-weight: bold;
+    font-size: 20px;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 3px rgba(0,0,0,0.6);
+    white-space: nowrap;
+    padding-right: 10px;
+    border-right: 2px solid rgba(255,255,255,0.15);
+    flex-shrink: 0;
+  }
+
+  #projects-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .project-tab {
+    position: relative;
+    padding: 9px 18px 9px 22px;
+    background: linear-gradient(180deg, #f2e2b6, #e3cf98);
+    color: #4a3418;
+    font-family: 'Georgia', serif;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    border: 1px solid #b89a5f;
+    border-bottom: none;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.15) inset;
+    white-space: nowrap;
+    transform: translateY(4px);
+    transition: transform 0.15s;
+    user-select: none;
+  }
+
+  .project-tab:hover { transform: translateY(1px); }
+
+  .project-tab.active {
+    background: linear-gradient(180deg, #fff8e3, #f0dda6);
+    transform: translateY(0);
+    box-shadow: 0 -3px 6px rgba(0,0,0,0.1) inset, 0 2px 4px rgba(0,0,0,0.3);
+    z-index: 2;
+  }
+
+  .project-tab .del-project {
+    margin-left: 10px;
+    color: #9a4b2f;
+    font-weight: bold;
+    opacity: 0.5;
+  }
+  .project-tab .del-project:hover { opacity: 1; }
+
+  #add-project-btn {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffe8a0, #c99a3e 70%, #8a6420);
+    border: 2px solid #6b4a1c;
+    color: #4a2e0a;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.4);
+    align-self: center;
+  }
+  #add-project-btn:hover { filter: brightness(1.1); }
+
+  #toolbar-right {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .tool-btn {
+    background: linear-gradient(180deg, #caa15a, #8a6420);
+    border: 1px solid #5c4114;
+    color: #2c1c05;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    white-space: nowrap;
+  }
+  .tool-btn:hover { filter: brightness(1.08); }
+
+  /* ---------- BOARD (cork) ---------- */
+
+  #board-wrap {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+    background: #3a2412;
+  }
+
+  #board {
+    position: relative;
+    min-width: 100%;
+    min-height: 100%;
+    width: 2400px;
+    height: 1500px;
+    background-color: #c68a4e;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,0.05) 0, transparent 40px),
+      radial-gradient(circle at 70% 60%, rgba(0,0,0,0.08) 0, transparent 35px),
+      radial-gradient(circle at 40% 80%, rgba(255,255,255,0.04) 0, transparent 30px),
+      radial-gradient(circle at 85% 15%, rgba(0,0,0,0.07) 0, transparent 45px),
+      radial-gradient(circle at 10% 90%, rgba(0,0,0,0.06) 0, transparent 25px),
+      repeating-radial-gradient(circle at 15% 15%, rgba(120,75,30,0.35) 0, rgba(120,75,30,0.35) 1px, transparent 2px, transparent 14px),
+      repeating-radial-gradient(circle at 55% 65%, rgba(90,55,20,0.3) 0, rgba(90,55,20,0.3) 1.5px, transparent 3px, transparent 18px),
+      repeating-radial-gradient(circle at 85% 35%, rgba(150,100,45,0.25) 0, rgba(150,100,45,0.25) 1px, transparent 2px, transparent 11px),
+      linear-gradient(135deg, #cf9457, #b87c3e 40%, #c6884a 70%, #ad7538);
+    box-shadow: inset 0 0 120px rgba(0,0,0,0.45), inset 0 0 300px rgba(0,0,0,0.25);
+    border: 14px solid #4a2e18;
+    outline: 4px solid #2a1a0d;
+  }
+
+  #board::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0.03) 0px, transparent 2px, transparent 6px);
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+
+  #empty-hint {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    color: rgba(60,35,10,0.55);
+    font-family: 'Comic Sans MS', 'Segoe Print', cursive;
+    font-size: 18px;
+    max-width: 300px;
+    pointer-events: none;
+  }
+
+  /* ---------- POST-IT ---------- */
+
+  .postit {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: 190px;
+    height: 170px;
+    padding: 26px 14px 16px 14px;
+    font-family: 'Comic Sans MS', 'Segoe Print', 'Bradley Hand', cursive;
+    font-size: 16px;
+    line-height: 1.35;
+    color: #2b2b2b;
+    cursor: grab;
+    box-shadow: 3px 6px 10px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.3) inset;
+    border-radius: 2px 2px 6px 6px / 2px 2px 10px 10px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    transition: box-shadow 0.15s, transform 0.08s;
+    user-select: none;
+  }
+
+  .postit:active { cursor: grabbing; }
+
+  .postit.dragging {
+    box-shadow: 6px 12px 22px rgba(0,0,0,0.5);
+    z-index: 999 !important;
+    transition: none;
+  }
+
+  .postit textarea {
+    width: 100%;
+    flex: 1;
+    background: transparent;
+    border: none;
+    resize: none;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    outline: none;
+    line-height: 1.35;
+  }
+
+  .postit .resize-handle {
+    position: absolute;
+    bottom: 2px;
+    right: 3px;
+    width: 16px;
+    height: 16px;
+    cursor: nwse-resize;
+    background:
+      linear-gradient(135deg, transparent 0 40%, rgba(0,0,0,0.35) 40% 46%, transparent 46% 60%, rgba(0,0,0,0.35) 60% 66%, transparent 66% 80%, rgba(0,0,0,0.35) 80% 86%, transparent 86%);
+  }
+
+  .postit .pin {
+    position: absolute;
+    top: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ff8a8a, #c92a2a 65%, #7a1414);
+    box-shadow: 0 3px 5px rgba(0,0,0,0.5), 0 -1px 1px rgba(255,255,255,0.4) inset;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .postit .del-note {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    font-size: 13px;
+    color: rgba(0,0,0,0.35);
+    cursor: pointer;
+    font-weight: bold;
+    padding: 2px 5px;
+    line-height: 1;
+  }
+  .postit .del-note:hover { color: #7a1414; }
+
+  .postit .color-dots {
+    position: absolute;
+    bottom: 20px;
+    right: 8px;
+    display: flex;
+    gap: 4px;
+  }
+  .color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.25);
+  }
+
+  #add-note-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 34px;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffe8a0, #c99a3e 70%, #8a6420);
+    border: 3px solid #5c4114;
+    color: #2c1c05;
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.5);
+    z-index: 100;
+  }
+  #add-note-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
+
+  .postit .note-date {
+    position: absolute;
+    bottom: 6px;
+    left: 10px;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 10px;
+    color: rgba(0,0,0,0.4);
+    pointer-events: none;
+  }
+
+  /* ---------- ALARM (per post-it) ---------- */
+
+  .postit .alarm-btn {
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    opacity: 0.45;
+    z-index: 6;
+  }
+  .postit .alarm-btn:hover { opacity: 0.9; }
+  .postit .alarm-btn.set { opacity: 0.9; }
+
+  .postit .alarm-info {
+    position: absolute;
+    top: 19px;
+    left: 6px;
+    max-width: 75%;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 9px;
+    line-height: 1.2;
+    color: rgba(0,0,0,0.55);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+  }
+  .postit .alarm-info.overdue {
+    color: #c92a2a;
+    font-weight: bold;
+  }
+
+  .postit.has-alarm-overdue {
+    outline: 3px solid #c92a2a;
+    animation: alarmPulse 1.2s infinite;
+  }
+  @keyframes alarmPulse {
+    0%, 100% { outline-color: rgba(201,42,42,0.9); }
+    50% { outline-color: rgba(201,42,42,0.35); }
+  }
+
+  .postit.highlight-flash {
+    animation: highlightFlash 1.5s ease;
+  }
+  @keyframes highlightFlash {
+    0%, 100% { box-shadow: 3px 6px 10px rgba(0,0,0,0.35); }
+    25%, 75% { box-shadow: 0 0 0 10px rgba(255,205,0,0.85), 3px 6px 10px rgba(0,0,0,0.35); }
+  }
+
+  /* ---------- ALARM MODAL & ALERT-FIRED MODAL (share trash-modal look) ---------- */
+
+  #alarm-overlay, #alertfired-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 600;
+  }
+  #alarm-overlay.open, #alertfired-overlay.open { display: flex; }
+
+  #alarm-modal, #alertfired-modal {
+    background: linear-gradient(180deg, #f2e2b6, #e3cf98);
+    border: 3px solid #4a2e18;
+    border-radius: 8px;
+    width: 320px;
+    max-width: 90vw;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  }
+
+  #alarm-modal header, #alertfired-modal header {
+    padding: 14px 18px;
+    border-bottom: 2px solid #b89a5f;
+    font-family: 'Georgia', serif;
+    font-weight: bold;
+    font-size: 16px;
+    color: #4a3418;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #alertfired-modal header {
+    background: linear-gradient(180deg, #d64545, #a81f1f);
+    color: #fff;
+    border-bottom: 2px solid #6e1414;
+  }
+
+  #alarm-modal header .close-trash { cursor: pointer; font-size: 18px; color: #7a4b2f; }
+
+  #alarm-body {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  #alarm-body label {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 12px;
+    color: #4a3418;
+    font-weight: 600;
+  }
+  #alarm-body input {
+    width: 100%;
+    margin-top: 4px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid #8a6a3a;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 13px;
+    box-sizing: border-box;
+  }
+  #alarm-modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+
+  #alertfired-modal .alertfired-body {
+    padding: 16px 18px;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+  }
+  #alertfired-modal .alertfired-project {
+    font-size: 12px;
+    color: #8a6a3a;
+    margin-bottom: 6px;
+  }
+  #alertfired-modal .alertfired-text {
+    font-family: 'Comic Sans MS', 'Segoe Print', cursive;
+    background: #fff8e3;
+    border: 1px solid #cbb27a;
+    border-radius: 6px;
+    padding: 10px 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 140px;
+    overflow-y: auto;
+    color: #2b2b2b;
+    font-size: 14px;
+  }
+  #alertfired-modal .alertfired-meta {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #4a3418;
+  }
+  #alertfired-modal .alertfired-actions {
+    padding: 12px 18px 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  #alertfired-modal .alertfired-actions button {
+    font-size: 13px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid #8a6a3a;
+    cursor: pointer;
+    background: #e3cf98;
+  }
+  #alertfired-modal .alertfired-actions button:hover { filter: brightness(1.08); }
+  #alertfired-modal .alertfired-actions button.primary {
+    background: linear-gradient(180deg, #caa15a, #8a6420);
+    border-color: #5c4114;
+    color: #2c1c05;
+    font-weight: bold;
+  }
+
+  /* ---------- CONFIG (email webhook) MODAL ---------- */
+
+  #config-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 600;
+  }
+  #config-overlay.open { display: flex; }
+
+  #config-modal {
+    background: linear-gradient(180deg, #f2e2b6, #e3cf98);
+    border: 3px solid #4a2e18;
+    border-radius: 8px;
+    width: 420px;
+    max-width: 90vw;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  }
+  #config-modal header {
+    padding: 14px 18px;
+    border-bottom: 2px solid #b89a5f;
+    font-family: 'Georgia', serif;
+    font-weight: bold;
+    font-size: 16px;
+    color: #4a3418;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #config-modal header .close-trash { cursor: pointer; font-size: 18px; color: #7a4b2f; }
+  #config-body {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  #config-body p {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 12px;
+    color: #4a3418;
+    margin: 0 0 4px 0;
+    line-height: 1.4;
+  }
+  #config-body label {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 12px;
+    color: #4a3418;
+    font-weight: 600;
+  }
+  #config-body input {
+    width: 100%;
+    margin-top: 4px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid #8a6a3a;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 13px;
+    box-sizing: border-box;
+  }
+  #config-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  /* ---------- TRASH MODAL ---------- */
+
+  #trash-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+  }
+  #trash-overlay.open { display: flex; }
+
+  #trash-modal {
+    background: linear-gradient(180deg, #f2e2b6, #e3cf98);
+    border: 3px solid #4a2e18;
+    border-radius: 8px;
+    width: 480px;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  }
+
+  #trash-modal header {
+    padding: 14px 18px;
+    border-bottom: 2px solid #b89a5f;
+    font-family: 'Georgia', serif;
+    font-weight: bold;
+    font-size: 17px;
+    color: #4a3418;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #trash-modal header .close-trash {
+    cursor: pointer;
+    font-size: 18px;
+    color: #7a4b2f;
+  }
+
+  #trash-list {
+    overflow-y: auto;
+    padding: 10px 14px;
+    flex: 1;
+  }
+
+  #trash-empty {
+    color: rgba(60,35,10,0.6);
+    font-style: italic;
+    padding: 20px 0;
+    text-align: center;
+  }
+
+  .trash-item {
+    background: #fffbe9;
+    border: 1px solid #cbb27a;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .trash-item .trash-text {
+    font-family: 'Comic Sans MS', 'Segoe Print', cursive;
+    font-size: 14px;
+    color: #2b2b2b;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 60px;
+    overflow: hidden;
+  }
+
+  .trash-item .trash-meta {
+    font-size: 11px;
+    color: #8a6a3a;
+    margin-top: 4px;
+  }
+
+  .trash-item .trash-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .trash-actions button {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #8a6a3a;
+    cursor: pointer;
+    background: #e3cf98;
+    white-space: nowrap;
+  }
+  .trash-actions button:hover { filter: brightness(1.08); }
+  .trash-actions button.danger { background: #e69a9a; border-color: #a14b4b; }
+</style>
+</head>
+<body>
+
+<div id="frame-top">
+  <div id="app-title">📌 Cartelera</div>
+  <div id="projects-bar"></div>
+  <button id="add-project-btn" title="Nuevo proyecto">+</button>
+  <div id="toolbar-right">
+    <button class="tool-btn" id="trash-btn">🗑️ Papelera</button>
+    <button class="tool-btn" id="config-btn">✉️ Config. email</button>
+    <button class="tool-btn" id="export-btn">Exportar</button>
+    <button class="tool-btn" id="import-btn">Importar</button>
+    <input type="file" id="import-file" accept=".json" style="display:none">
+  </div>
+</div>
+
+<div id="board-wrap">
+  <div id="board">
+    <div id="empty-hint"></div>
+  </div>
+</div>
+
+<button id="add-note-btn" title="Agregar post-it">+</button>
+
+<div id="trash-overlay">
+  <div id="trash-modal">
+    <header>
+      <span id="trash-title">Papelera</span>
+      <span class="close-trash" id="close-trash">✕</span>
+    </header>
+    <div id="trash-list"></div>
+  </div>
+</div>
+
+<div id="alarm-overlay">
+  <div id="alarm-modal">
+    <header>
+      <span>⏰ Configurar alerta</span>
+      <span class="close-trash" id="close-alarm">✕</span>
+    </header>
+    <div id="alarm-body">
+      <label>Fecha
+        <input type="date" id="alarm-date">
+      </label>
+      <label>Hora
+        <input type="time" id="alarm-time">
+      </label>
+      <label>Email a notificar
+        <input type="email" id="alarm-email" placeholder="correo@ejemplo.com">
+      </label>
+      <div id="alarm-modal-actions">
+        <button class="tool-btn" id="alarm-remove-btn" style="background:#e69a9a;border-color:#a14b4b;">Quitar alerta</button>
+        <button class="tool-btn" id="alarm-save-btn">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="config-overlay">
+  <div id="config-modal">
+    <header>
+      <span>✉️ Configurar envío de email</span>
+      <span class="close-trash" id="close-config">✕</span>
+    </header>
+    <div id="config-body">
+      <p>Pega aquí la URL de tu Web App de Google Apps Script (ver instrucciones que te dieron). Con esto, cuando una alerta venza, la cartelera pedirá a tu propio Gmail que envíe el correo — sin costo.</p>
+      <label>URL del Web App
+        <input type="text" id="config-gas-url" placeholder="https://script.google.com/macros/s/XXXX/exec">
+      </label>
+      <div id="config-modal-actions">
+        <button class="tool-btn" id="config-save-btn">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="alertfired-overlay">
+  <div id="alertfired-modal">
+    <header>
+      <span>⏰ ¡Alerta vencida!</span>
+    </header>
+    <div class="alertfired-body">
+      <div class="alertfired-project"></div>
+      <div class="alertfired-text"></div>
+      <div class="alertfired-meta"></div>
+    </div>
+    <div class="alertfired-actions">
+      <button id="alertfired-goto">Ir a la nota</button>
+      <button id="alertfired-close" class="primary">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'cartelera_corcho_data_v1';
+  const COLORS = ['#fff275', '#ff8fab', '#8ecae6', '#b7e4a0', '#ffb703', '#c8b6ff'];
+
+  function normalizeData(parsed) {
+    if (!parsed.settings) parsed.settings = { gasWebAppUrl: '' };
+    if (parsed.settings.gasWebAppUrl === undefined) parsed.settings.gasWebAppUrl = '';
+    parsed.projects.forEach(p => {
+      if (!Array.isArray(p.trash)) p.trash = [];
+      p.notes.forEach(n => {
+        if (!n.createdAt) n.createdAt = Date.now();
+        if (!n.width) n.width = 190;
+        if (!n.height) n.height = 170;
+        if (n.alarm === undefined) n.alarm = null;
+      });
+    });
+    return parsed;
+  }
+
+  function loadData() {
+    let parsed = null;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) parsed = JSON.parse(raw);
+    } catch (e) {}
+    if (!parsed) {
+      const defaultProjectId = 'p_' + Date.now();
+      parsed = {
+        activeProjectId: defaultProjectId,
+        settings: { gasWebAppUrl: '' },
+        projects: [{ id: defaultProjectId, name: 'General', notes: [], trash: [] }]
+      };
+    }
+    return normalizeData(parsed);
+  }
+
+  function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function formatDate(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    const pad = n => String(n).padStart(2, '0');
+    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  let data = loadData();
+  let zTop = 10;
+  let idCounter = Date.now();
+
+  const projectsBar = document.getElementById('projects-bar');
+  const board = document.getElementById('board');
+  const emptyHint = document.getElementById('empty-hint');
+
+  function getActiveProject() {
+    return data.projects.find(p => p.id === data.activeProjectId) || data.projects[0];
+  }
+
+  function uid() {
+    idCounter += 1;
+    return 'n_' + idCounter;
+  }
+
+  function renderProjectTabs() {
+    projectsBar.innerHTML = '';
+    data.projects.forEach(proj => {
+      const tab = document.createElement('div');
+      tab.className = 'project-tab' + (proj.id === data.activeProjectId ? ' active' : '');
+      tab.textContent = proj.name;
+
+      const del = document.createElement('span');
+      del.className = 'del-project';
+      del.textContent = '✕';
+      del.title = 'Eliminar proyecto';
+      del.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (data.projects.length <= 1) {
+          alert('Debe existir al menos un proyecto.');
+          return;
+        }
+        if (confirm('¿Eliminar el proyecto "' + proj.name + '" y todas sus notas?')) {
+          data.projects = data.projects.filter(p => p.id !== proj.id);
+          if (data.activeProjectId === proj.id) {
+            data.activeProjectId = data.projects[0].id;
+          }
+          saveData();
+          renderProjectTabs();
+          renderNotes();
+        }
+      });
+      tab.appendChild(del);
+
+      tab.addEventListener('click', () => {
+        data.activeProjectId = proj.id;
+        saveData();
+        renderProjectTabs();
+        renderNotes();
+      });
+
+      projectsBar.appendChild(tab);
+    });
+  }
+
+  function renderNotes() {
+    board.querySelectorAll('.postit').forEach(el => el.remove());
+    const proj = getActiveProject();
+    if (!proj.notes.length) {
+      emptyHint.textContent = 'No hay notas en "' + proj.name + '". Usa el botón + para agregar una.';
+    } else {
+      emptyHint.textContent = '';
+    }
+    proj.notes.forEach(note => renderNote(note));
+  }
+
+  function renderNote(note) {
+    const el = document.createElement('div');
+    el.className = 'postit';
+    el.style.left = note.x + 'px';
+    el.style.top = note.y + 'px';
+    el.style.width = (note.width || 190) + 'px';
+    el.style.height = (note.height || 170) + 'px';
+    el.style.background = note.color;
+    el.style.transform = 'rotate(' + note.rot + 'deg)';
+    el.style.zIndex = note.z || 1;
+    el.dataset.id = note.id;
+
+    const pin = document.createElement('div');
+    pin.className = 'pin';
+    el.appendChild(pin);
+
+    const del = document.createElement('div');
+    del.className = 'del-note';
+    del.textContent = '✕';
+    del.title = 'Enviar a la papelera';
+    del.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const proj = getActiveProject();
+      proj.notes = proj.notes.filter(n => n.id !== note.id);
+      note.deletedAt = Date.now();
+      proj.trash.push(note);
+      saveData();
+      el.remove();
+      if (!proj.notes.length) emptyHint.textContent = 'No hay notas en "' + proj.name + '". Usa el botón + para agregar una.';
+    });
+    el.appendChild(del);
+
+    const dateLabel = document.createElement('div');
+    dateLabel.className = 'note-date';
+    dateLabel.textContent = formatDate(note.createdAt);
+    el.appendChild(dateLabel);
+
+    const alarmBtn = document.createElement('div');
+    alarmBtn.className = 'alarm-btn' + (note.alarm ? ' set' : '');
+    alarmBtn.textContent = '⏰';
+    alarmBtn.title = 'Configurar alerta';
+    alarmBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+    alarmBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openAlarmModal(note);
+    });
+    el.appendChild(alarmBtn);
+
+    if (note.alarm) {
+      const alarmInfo = document.createElement('div');
+      alarmInfo.className = 'alarm-info' + (note.alarm.triggered ? ' overdue' : '');
+      alarmInfo.textContent = (note.alarm.triggered ? '⚠ Venció ' : '⏰ ') + formatDate(note.alarm.timestamp);
+      el.appendChild(alarmInfo);
+      if (note.alarm.triggered) el.classList.add('has-alarm-overdue');
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = note.text || '';
+    textarea.placeholder = 'Escribe aquí...';
+    textarea.addEventListener('input', () => {
+      note.text = textarea.value;
+      saveData();
+    });
+    textarea.addEventListener('mousedown', (e) => e.stopPropagation());
+    el.appendChild(textarea);
+
+    const dots = document.createElement('div');
+    dots.className = 'color-dots';
+    COLORS.forEach(c => {
+      const dot = document.createElement('div');
+      dot.className = 'color-dot';
+      dot.style.background = c;
+      dot.addEventListener('mousedown', (e) => e.stopPropagation());
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        note.color = c;
+        el.style.background = c;
+        saveData();
+      });
+      dots.appendChild(dot);
+    });
+    el.appendChild(dots);
+
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'resize-handle';
+    el.appendChild(resizeHandle);
+
+    makeDraggable(el, note);
+    makeResizable(el, note, resizeHandle);
+    board.appendChild(el);
+  }
+
+  function makeResizable(el, note, handle) {
+    let startX, startY, origW, origH, resizing = false;
+    const MIN_W = 120, MIN_H = 110;
+
+    handle.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      resizing = true;
+      zTop += 1;
+      note.z = zTop;
+      el.style.zIndex = zTop;
+      startX = e.clientX;
+      startY = e.clientY;
+      origW = note.width || 190;
+      origH = note.height || 170;
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!resizing) return;
+      note.width = Math.max(MIN_W, origW + (e.clientX - startX));
+      note.height = Math.max(MIN_H, origH + (e.clientY - startY));
+      el.style.width = note.width + 'px';
+      el.style.height = note.height + 'px';
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!resizing) return;
+      resizing = false;
+      saveData();
+    });
+  }
+
+  function makeDraggable(el, note) {
+    let startX, startY, origX, origY, dragging = false;
+
+    el.addEventListener('mousedown', (e) => {
+      if (e.target.tagName === 'TEXTAREA' || e.target.classList.contains('del-note') || e.target.classList.contains('color-dot') || e.target.classList.contains('resize-handle')) return;
+      dragging = true;
+      el.classList.add('dragging');
+      zTop += 1;
+      note.z = zTop;
+      el.style.zIndex = zTop;
+      startX = e.clientX;
+      startY = e.clientY;
+      origX = note.x;
+      origY = note.y;
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      note.x = origX + dx;
+      note.y = origY + dy;
+      el.style.left = note.x + 'px';
+      el.style.top = note.y + 'px';
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!dragging) return;
+      dragging = false;
+      el.classList.remove('dragging');
+      saveData();
+    });
+  }
+
+  document.getElementById('add-note-btn').addEventListener('click', () => {
+    const proj = getActiveProject();
+    zTop += 1;
+    const note = {
+      id: uid(),
+      text: '',
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      x: 60 + Math.random() * 300,
+      y: 60 + Math.random() * 200,
+      width: 190,
+      height: 170,
+      rot: Math.round((Math.random() * 8 - 4) * 10) / 10,
+      z: zTop,
+      createdAt: Date.now()
+    };
+    proj.notes.push(note);
+    saveData();
+    renderNote(note);
+    emptyHint.textContent = '';
+  });
+
+  document.getElementById('add-project-btn').addEventListener('click', () => {
+    const name = prompt('Nombre del nuevo proyecto:');
+    if (!name) return;
+    const proj = { id: 'p_' + uid(), name: name.trim() || 'Proyecto', notes: [], trash: [] };
+    data.projects.push(proj);
+    data.activeProjectId = proj.id;
+    saveData();
+    renderProjectTabs();
+    renderNotes();
+  });
+
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cartelera-backup.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  const importFile = document.getElementById('import-file');
+  document.getElementById('import-btn').addEventListener('click', () => importFile.click());
+  importFile.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (parsed.projects && parsed.activeProjectId) {
+          data = normalizeData(parsed);
+          saveData();
+          renderProjectTabs();
+          renderNotes();
+        } else {
+          alert('Archivo inválido.');
+        }
+      } catch (err) {
+        alert('No se pudo leer el archivo.');
+      }
+    };
+    reader.readAsText(file);
+    importFile.value = '';
+  });
+
+  const trashOverlay = document.getElementById('trash-overlay');
+  const trashList = document.getElementById('trash-list');
+  const trashTitle = document.getElementById('trash-title');
+
+  function renderTrash() {
+    const proj = getActiveProject();
+    trashTitle.textContent = 'Papelera — ' + proj.name;
+    trashList.innerHTML = '';
+    if (!proj.trash.length) {
+      const empty = document.createElement('div');
+      empty.id = 'trash-empty';
+      empty.textContent = 'No hay notas eliminadas en este proyecto.';
+      trashList.appendChild(empty);
+      return;
+    }
+    proj.trash.slice().reverse().forEach(note => {
+      const item = document.createElement('div');
+      item.className = 'trash-item';
+
+      const left = document.createElement('div');
+      const text = document.createElement('div');
+      text.className = 'trash-text';
+      text.textContent = note.text || '(nota vacía)';
+      const meta = document.createElement('div');
+      meta.className = 'trash-meta';
+      meta.textContent = 'Creada: ' + formatDate(note.createdAt) + ' · Eliminada: ' + formatDate(note.deletedAt);
+      left.appendChild(text);
+      left.appendChild(meta);
+
+      const actions = document.createElement('div');
+      actions.className = 'trash-actions';
+
+      const restoreBtn = document.createElement('button');
+      restoreBtn.textContent = 'Restaurar';
+      restoreBtn.addEventListener('click', () => {
+        const proj = getActiveProject();
+        proj.trash = proj.trash.filter(n => n.id !== note.id);
+        delete note.deletedAt;
+        proj.notes.push(note);
+        saveData();
+        renderNotes();
+        renderTrash();
+      });
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'danger';
+      delBtn.textContent = 'Eliminar definitivo';
+      delBtn.addEventListener('click', () => {
+        if (!confirm('Esta nota se eliminará para siempre. ¿Continuar?')) return;
+        const proj = getActiveProject();
+        proj.trash = proj.trash.filter(n => n.id !== note.id);
+        saveData();
+        renderTrash();
+      });
+
+      actions.appendChild(restoreBtn);
+      actions.appendChild(delBtn);
+
+      item.appendChild(left);
+      item.appendChild(actions);
+      trashList.appendChild(item);
+    });
+  }
+
+  document.getElementById('trash-btn').addEventListener('click', () => {
+    renderTrash();
+    trashOverlay.classList.add('open');
+  });
+  document.getElementById('close-trash').addEventListener('click', () => {
+    trashOverlay.classList.remove('open');
+  });
+  trashOverlay.addEventListener('click', (e) => {
+    if (e.target === trashOverlay) trashOverlay.classList.remove('open');
+  });
+
+  /* ---------- CONFIG (email webhook) ---------- */
+
+  const configOverlay = document.getElementById('config-overlay');
+  const configGasUrlInput = document.getElementById('config-gas-url');
+
+  document.getElementById('config-btn').addEventListener('click', () => {
+    configGasUrlInput.value = (data.settings && data.settings.gasWebAppUrl) || '';
+    configOverlay.classList.add('open');
+  });
+  document.getElementById('close-config').addEventListener('click', () => {
+    configOverlay.classList.remove('open');
+  });
+  configOverlay.addEventListener('click', (e) => {
+    if (e.target === configOverlay) configOverlay.classList.remove('open');
+  });
+  document.getElementById('config-save-btn').addEventListener('click', () => {
+    data.settings.gasWebAppUrl = configGasUrlInput.value.trim();
+    saveData();
+    configOverlay.classList.remove('open');
+  });
+
+  function emailIntegrationConfigured() {
+    return !!(data.settings && data.settings.gasWebAppUrl && data.settings.gasWebAppUrl.trim());
+  }
+
+  function sendAlarmEmail(item) {
+    if (!item.alarm.email || !emailIntegrationConfigured()) return;
+    const baseUrl = data.settings.gasWebAppUrl.trim();
+    const subject = '⏰ Alerta vencida: ' + item.projectName + ' — Cartelera de Corcho';
+    const bodyText = 'La nota "' + (item.text && item.text.trim() ? item.text : '(nota vacía)') +
+      '" del proyecto "' + item.projectName + '" venció el ' + formatDate(item.alarm.timestamp) +
+      '.\n\nCartelera de Corcho.';
+    const sep = baseUrl.indexOf('?') === -1 ? '?' : '&';
+    const fullUrl = baseUrl + sep + 'to=' + encodeURIComponent(item.alarm.email) +
+      '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(bodyText);
+    fetch(fullUrl, { mode: 'no-cors' }).catch(() => {});
+  }
+
+  /* ---------- ALARMS ---------- */
+
+  const alarmOverlay = document.getElementById('alarm-overlay');
+  const alarmDateInput = document.getElementById('alarm-date');
+  const alarmTimeInput = document.getElementById('alarm-time');
+  const alarmEmailInput = document.getElementById('alarm-email');
+
+  const alertFiredOverlay = document.getElementById('alertfired-overlay');
+  const alertFiredProject = alertFiredOverlay.querySelector('.alertfired-project');
+  const alertFiredText = alertFiredOverlay.querySelector('.alertfired-text');
+  const alertFiredMeta = alertFiredOverlay.querySelector('.alertfired-meta');
+
+  let alarmModalNoteId = null;
+  let pendingAlerts = [];
+  let alarmFiredShowing = false;
+  let currentAlertItem = null;
+
+  function findNoteById(noteId) {
+    for (const proj of data.projects) {
+      const note = proj.notes.find(n => n.id === noteId);
+      if (note) return { note, project: proj };
+    }
+    return null;
+  }
+
+  function openAlarmModal(note) {
+    alarmModalNoteId = note.id;
+    alarmDateInput.value = note.alarm ? note.alarm.date : '';
+    alarmTimeInput.value = note.alarm ? note.alarm.time : '';
+    alarmEmailInput.value = note.alarm ? note.alarm.email : '';
+    alarmOverlay.classList.add('open');
+  }
+
+  function closeAlarmModal() {
+    alarmOverlay.classList.remove('open');
+    alarmModalNoteId = null;
+  }
+
+  document.getElementById('close-alarm').addEventListener('click', closeAlarmModal);
+  alarmOverlay.addEventListener('click', (e) => {
+    if (e.target === alarmOverlay) closeAlarmModal();
+  });
+
+  document.getElementById('alarm-save-btn').addEventListener('click', () => {
+    if (!alarmModalNoteId) return;
+    const found = findNoteById(alarmModalNoteId);
+    if (!found) return;
+    const dateVal = alarmDateInput.value;
+    const timeVal = alarmTimeInput.value;
+    const emailVal = alarmEmailInput.value.trim();
+    if (!dateVal || !timeVal) {
+      alert('Selecciona fecha y hora para la alerta.');
+      return;
+    }
+    const ts = new Date(dateVal + 'T' + timeVal + ':00').getTime();
+    if (isNaN(ts)) {
+      alert('Fecha u hora inválida.');
+      return;
+    }
+    found.note.alarm = { date: dateVal, time: timeVal, email: emailVal, timestamp: ts, triggered: false };
+    saveData();
+    closeAlarmModal();
+    renderNotes();
+  });
+
+  document.getElementById('alarm-remove-btn').addEventListener('click', () => {
+    if (!alarmModalNoteId) return;
+    const found = findNoteById(alarmModalNoteId);
+    if (!found) return;
+    found.note.alarm = null;
+    saveData();
+    closeAlarmModal();
+    renderNotes();
+  });
+
+  function checkAlarms() {
+    const now = Date.now();
+    let anyTriggered = false;
+    data.projects.forEach(proj => {
+      proj.notes.forEach(note => {
+        if (note.alarm && !note.alarm.triggered && note.alarm.timestamp <= now) {
+          note.alarm.triggered = true;
+          anyTriggered = true;
+          const item = {
+            noteId: note.id,
+            projectId: proj.id,
+            projectName: proj.name,
+            text: note.text,
+            alarm: { date: note.alarm.date, time: note.alarm.time, email: note.alarm.email, timestamp: note.alarm.timestamp }
+          };
+          pendingAlerts.push(item);
+          sendAlarmEmail(item);
+        }
+      });
+    });
+    if (anyTriggered) {
+      saveData();
+      renderNotes();
+      processAlertQueue();
+    }
+  }
+
+  function processAlertQueue() {
+    if (alarmFiredShowing || !pendingAlerts.length) return;
+    currentAlertItem = pendingAlerts.shift();
+    alertFiredProject.textContent = 'Proyecto: ' + currentAlertItem.projectName;
+    alertFiredText.textContent = currentAlertItem.text && currentAlertItem.text.trim() ? currentAlertItem.text : '(nota vacía)';
+    let metaText = 'Programada para: ' + formatDate(currentAlertItem.alarm.timestamp);
+    if (currentAlertItem.alarm.email) {
+      if (emailIntegrationConfigured()) {
+        metaText += '\nCorreo enviado a: ' + currentAlertItem.alarm.email;
+      } else {
+        metaText += '\n⚠ No se envió el correo: configura la integración con el botón "✉️ Config. email"';
+      }
+    }
+    alertFiredMeta.textContent = metaText;
+    alertFiredMeta.style.whiteSpace = 'pre-line';
+    alertFiredOverlay.classList.add('open');
+    alarmFiredShowing = true;
+  }
+
+  function closeAlertFiredModal() {
+    alertFiredOverlay.classList.remove('open');
+    alarmFiredShowing = false;
+    currentAlertItem = null;
+    setTimeout(processAlertQueue, 300);
+  }
+
+  document.getElementById('alertfired-close').addEventListener('click', closeAlertFiredModal);
+
+  document.getElementById('alertfired-goto').addEventListener('click', () => {
+    const item = currentAlertItem;
+    if (!item) return;
+    closeAlertFiredModal();
+    data.activeProjectId = item.projectId;
+    saveData();
+    renderProjectTabs();
+    renderNotes();
+    setTimeout(() => {
+      const el = board.querySelector('[data-id="' + item.noteId + '"]');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        el.classList.add('highlight-flash');
+        setTimeout(() => el.classList.remove('highlight-flash'), 1500);
+      }
+    }, 50);
+  });
+
+  setInterval(checkAlarms, 20000);
+  setTimeout(checkAlarms, 800);
+
+  renderProjectTabs();
+  renderNotes();
+})();
+</script>
+
+</body>
+</html>

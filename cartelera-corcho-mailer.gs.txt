@@ -1,0 +1,15 @@
+function doGet(e) {
+  try {
+    var to = e.parameter.to;
+    var subject = e.parameter.subject || 'Alerta - Cartelera de Corcho';
+    var body = e.parameter.body || '';
+
+    if (to) {
+      MailApp.sendEmail(to, subject, body);
+    }
+
+    return ContentService.createTextOutput('OK');
+  } catch (err) {
+    return ContentService.createTextOutput('ERROR: ' + err);
+  }
+}
